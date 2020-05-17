@@ -21,18 +21,26 @@ ESP8266WebServer server(80);
 boolean apagado = false;
 int connectionTime = 0;
 
-const PROGMEM int DIGITAL_PINS[] = {
-    16, 5, 4, 0, 2, 14, 12, 1, 15};
-boolean digitalStatus[] = {
-    false, false, false, false, false, false, false, false, false};
+typedef struct record_type {
+  int pin;
+  boolean status;
+};
+record_type pins_array[9];
 
 void setup(void)
 {
+  pins_array[0] = (record_type){16, false};
+  pins_array[1] = (record_type){5, false};
+  pins_array[2] = (record_type){4, false};
+  pins_array[3] = (record_type){0, false};
+  pins_array[4] = (record_type){2, false};
+  pins_array[5] = (record_type){14, false};
+  pins_array[6] = (record_type){12, false};
+  pins_array[7] = (record_type){1, false};
+  pins_array[8] = (record_type){15, false};
+
   Serial.begin(BAUD_RATE);
-  while (!Serial)
-  {
-    ; // wait for serial port to connect. Needed for native USB port only
-  }
+  while (!Serial) { ; }
   Serial.print("Serial BAUD_RATE: ");
   Serial.println(BAUD_RATE);
 
@@ -67,13 +75,13 @@ void setup(void)
   }
 
   server.on("/test", handleTest);
-  server.on("/DIGITAL_PIN/SWITCH", handleDigitalPinSwitch);
-  server.on("/DIGITAL_PIN/ON", handleDigitalPinOn);
-  server.on("/DIGITAL_PIN/OFF", handleDigitalPinOff);
   server.on("/LED_BUILTIN/SWITCH", handleLedBuiltinSwitch);
   server.on("/LED_BUILTIN/ON", handleLedBuiltinOn);
   server.on("/LED_BUILTIN/OFF", handleLedBuiltinOff);
   server.on("/TIME", handleTime);
+  server.on("/DIGITAL_PIN/SWITCH", handleDigitalPinSwitch);
+  server.on("/DIGITAL_PIN/ON", handleDigitalPinOn);
+  server.on("/DIGITAL_PIN/OFF", handleDigitalPinOff);
   server.onNotFound(handleNotFound);
   server.begin();
   Serial.println("HTTP server started");
@@ -87,8 +95,8 @@ void setup(void)
   }
   Serial.println("Time configured.");
 
-  pinMode(DIGITAL_PINS[1], OUTPUT);
-  digitalWrite(DIGITAL_PINS[1], LOW);
+  pinMode(pins_array[1].pin, OUTPUT);
+  digitalWrite(pins_array[1].pin, LOW);
   Serial.println("Pines digitales inicializados.");
 
   pinMode(LED_BUILTIN, OUTPUT);
@@ -142,51 +150,51 @@ void handleDigitalPinOff()
 
 void digitalPinSwitch(int pin)
 {
-  if (digitalStatus[pin])
+  if (pins_array[pin].status)
   {
-    Serial.println("Desactivando pin digital: D" + String(pin) + "-" + String(DIGITAL_PINS[pin]));
-    digitalWrite(DIGITAL_PINS[pin], LOW);
-    digitalStatus[pin] = false;
+    Serial.println("Desactivando pin digital: D" + String(pin) + "-" + String(pins_array[pin].pin));
+    digitalWrite(pins_array[pin].pin, LOW);
+    pins_array[pin].status = false;
     server.send(200, "text/plain", "Pin digital D" +  String(pin) + " SWITCH A apagado");
   }
   else
   {
-    Serial.println("Activando pin digital: D" + String(pin) + "-" + String(DIGITAL_PINS[pin]));
-    digitalWrite(DIGITAL_PINS[pin], HIGH);
-    digitalStatus[pin] = true;
+    Serial.println("Activando pin digital: D" + String(pin) + "-" + String(pins_array[pin].pin));
+    digitalWrite(pins_array[pin].pin, HIGH);
+    pins_array[pin].status = true;
     server.send(200, "text/plain", "Pin digital D" +  String(pin) + " SWITCH A encendido");
   }
 }
 
 void digitalPinOn(int pin)
 {
-  if (digitalStatus[pin])
+  if (pins_array[pin].status)
   {
-    Serial.println("Pin digital: D" + String(pin) + "-" + String(DIGITAL_PINS[pin]) + " ya estaba activado.");
-    server.send(200, "text/plain", "Pin digital: D" + String(pin) + "-" + String(DIGITAL_PINS[pin]) + " ya está activado.");
+    Serial.println("Pin digital: D" + String(pin) + "-" + String(pins_array[pin].pin) + " ya estaba activado.");
+    server.send(200, "text/plain", "Pin digital: D" + String(pin) + "-" + String(pins_array[pin].pin) + " ya está activado.");
   }
   else
   {
-    Serial.println("Activando pin digital: D" + String(pin) + "-" + String(DIGITAL_PINS[pin]));
-    digitalWrite(DIGITAL_PINS[pin], HIGH);
-    digitalStatus[pin] = true;
+    Serial.println("Activando pin digital: D" + String(pin) + "-" + String(pins_array[pin].pin));
+    digitalWrite(pins_array[pin].pin, HIGH);
+    pins_array[pin].status = true;
     server.send(200, "text/plain", "Pin digital D" +  String(pin) + " activado");
   }
 }
 
 void digitalPinOff(int pin)
 {
-  if (digitalStatus[pin])
+  if (pins_array[pin].status)
   {
-    Serial.println("Desactivando pin digital: D" + String(pin) + "-" + String(DIGITAL_PINS[pin]));
-    digitalWrite(DIGITAL_PINS[pin], LOW);
-    digitalStatus[pin] = false;
+    Serial.println("Desactivando pin digital: D" + String(pin) + "-" + String(pins_array[pin].pin));
+    digitalWrite(pins_array[pin].pin, LOW);
+    pins_array[pin].status = false;
     server.send(200, "text/plain", "Pin digital D" +  String(pin) + " desactivado");
   }
   else
   {
-    Serial.println("Pin digital: D" + String(pin) + "-" + String(DIGITAL_PINS[pin]) + " ya estaba desactivado.");
-    server.send(200, "text/plain", "Pin digital: D" + String(pin) + "-" + String(DIGITAL_PINS[pin]) + " ya está desactivado.");
+    Serial.println("Pin digital: D" + String(pin) + "-" + String(pins_array[pin].pin) + " ya estaba desactivado.");
+    server.send(200, "text/plain", "Pin digital: D" + String(pin) + "-" + String(pins_array[pin].pin) + " ya está desactivado.");
   }
 }
 
