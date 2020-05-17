@@ -1,0 +1,6 @@
+{
+    "board": "arduino:avr:mega",
+    "configuration": "cpu=atmega2560",
+    "sketch": "blink.ino",
+    "port": "/dev/tty.usbmodem142301"
+}
