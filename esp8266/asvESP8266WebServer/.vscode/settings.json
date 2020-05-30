@@ -1,0 +1,6 @@
+{
+  "files.associations": {
+    "*.pde": "arduino",
+    "filesystem": "cpp"
+  }
+}
