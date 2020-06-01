@@ -17,8 +17,9 @@ const char *SERVER_NTP_2 = "time.nist.gov";
 
 const int BAUD_RATE = 115200;
 const int DELAY_CONNECT = 100;
+const int ONE_SECOND = 1000;
 const int MAX_DURATION_SECONDS = 300;
-const int MAX_PIN_NUMBER = 9;
+const int AMOUNT_OF_PINS = 9;
 
 ESP8266WebServer server(80);
 boolean ledBuiltinStatus = true;
@@ -38,7 +39,7 @@ typedef struct record_type
   time_t end1;
   char *result;
 } pin_type;
-record_type pins_array[MAX_PIN_NUMBER];
+record_type pins_array[AMOUNT_OF_PINS];
 
 void setup(void)
 {
@@ -54,10 +55,12 @@ void loop(void)
 {
   server.handleClient();
   MDNS.update();
+
+  // Control de programación
   if (scheduledMode == 1)
   {
-    time_t ahora = time(nullptr);
-    for (int i = 0; i <= 8; i++)
+    time_t ahora = time(nullptr) - 1590969600;
+    for (int i = 0; i < AMOUNT_OF_PINS; i++)
     {
       // Si el pin está activado
       if (pins_array[i].status)
@@ -94,25 +97,25 @@ void loop(void)
 void initPins()
 {
   pins_array[0] = (record_type){16, "\"Riego fase 1          \"", false, LOW, HIGH,
-                                1590778862L, 1590978862L, 0L, 0L, "\"Estado inicial\""};
+                                25200L, 25320L, 0L, 0L, "\"Estado inicial\""};
   pins_array[1] = (record_type){5, "\"Riego fase 2          \"", false, LOW, HIGH,
-                                1590778862L, 1590978862L, 0L, 0L, "\"Estado inicial\""};
+                                25500L, 25620L, 0L, 0L, "\"Estado inicial\""};
   pins_array[2] = (record_type){4, "\"Depuradora            \"", false, LOW, HIGH,
-                                1590778862L, 1590978862L, 0L, 0L, "\"Estado inicial\""};
+                                0L, 0L, 0L, 0L, "\"Estado inicial\""};
   pins_array[3] = (record_type){0, "\"Luz caseta            \"", false, LOW, HIGH,
-                                1590778862L, 1590978862L, 0L, 0L, "\"Estado inicial\""};
+                                0L, 0L, 0L, 0L, "\"Estado inicial\""};
   pins_array[4] = (record_type){2, "\"No utilizar (LED)     \"", false, HIGH, LOW,
-                                1590778862L, 1590978862L, 0L, 0L, "\"Estado inicial\""};
+                                0L, 0L, 0L, 0L, "\"Estado inicial\""};
   pins_array[5] = (record_type){14, "\"Puerta garaje interior\"", false, HIGH, LOW,
-                                1590778862L, 1590978862L, 0L, 0L, "\"Estado inicial\""};
+                                0L, 0L, 0L, 0L, "\"Estado inicial\""};
   pins_array[6] = (record_type){12, "\"Puerta garaje exterior\"", false, HIGH, LOW,
-                                1590778862L, 1590978862L, 0L, 0L, "\"Estado inicial\""};
+                                0L, 0L, 0L, 0L, "\"Estado inicial\""};
   pins_array[7] = (record_type){13, "\"Puerta casa exterior  \"", false, HIGH, LOW,
-                                1590778862L, 1590978862L, 0L, 0L, "\"Estado inicial\""};
+                                0L, 0L, 0L, 0L, "\"Estado inicial\""};
   pins_array[8] = (record_type){15, "\"Libre                 \"", false, HIGH, LOW,
-                                1590778862L, 1590978862L, 0L, 0L, "\"Estado inicial\""};
+                                0L, 0L, 0L, 0L, "\"Estado inicial\""};
 
-  for (int i = 0; i <= 8; i++)
+  for (int i = 0; i < AMOUNT_OF_PINS; i++)
   {
     pinMode(pins_array[i].pin, OUTPUT);
     pins_array[i].status ? digitalWrite(pins_array[i].pin, pins_array[i].on_value) : digitalWrite(pins_array[i].pin, pins_array[i].off_value);
@@ -179,6 +182,10 @@ void initServer()
   server.on("/DIGITAL_PIN/SWITCH", handleDigitalPinSwitch);
   server.on("/DIGITAL_PIN/ON", handleDigitalPinOn);
   server.on("/DIGITAL_PIN/OFF", handleDigitalPinOff);
+  server.on("/DIGITAL_PIN_POST", HTTP_OPTIONS, []() {
+    server.sendHeader("Access-Control-Allow-Origin", "*");
+    server.send(204);
+  });
   server.on("/DIGITAL_PIN_POST", HTTP_POST, handleDigitalPinPost);
 
   server.on("/SCHEDULED", handleScheduledGet);
@@ -196,7 +203,7 @@ void initTime()
   while (!time(nullptr))
   {
     Serial.print(".");
-    delay(1000);
+    delay(ONE_SECOND);
   }
   Serial.println("Time configured.");
 }
@@ -209,19 +216,16 @@ void handleTest()
 
 void handleTime()
 {
-  String response = "";
   time_t now = time(nullptr);
   char buff[20];
   strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
-  response = "{\"time\":" + String(now) + String("}");
-  Serial.println(response);
+  String response = "{\"time\":" + String(now) + String("}");
   server.send(200, "application/json", response);
 }
 
 void handleLedBuiltinGet()
 {
-  String status = "";
-  status = ledBuiltinStatus ? "1" : "0";
+  String status = ledBuiltinStatus ? "1" : "0";
   String response = "{\"ledBuiltin\":\"" + status + String("\"}");
   server.send(200, "application/json", response);
 }
@@ -241,7 +245,7 @@ void handleLedBuiltinSwitch()
     Serial.println("Apagando LED");
     digitalWrite(LED_BUILTIN, LOW);
     ledBuiltinStatus = false;
-    response = "{\"result\":\"LED_BUILTIN SWITCH A encendido\"}";
+    response = "{\"result\":\"LED_BUILTIN SWITCH A apagado\"}";
   }
   server.send(200, "application/json", response);
 }
@@ -285,9 +289,15 @@ void handleLedBuiltinOff()
 void handleDigitalPins()
 {
   String response = "{\"pines\":[";
-  for (int i = 0; i < MAX_PIN_NUMBER; i++)
+  for (int i = 0; i < AMOUNT_OF_PINS; i++)
   {
-    response += "{\"pin\":" + String(i) + ", \"description\":" + String(pins_array[i].description) + ", \"start0\":" + String(pins_array[i].start0) + ", \"end0\":" + String(pins_array[i].end0) + ", \"status\":" + pins_array[i].status + ", \"result\":" + String(pins_array[i].result) + "}";
+    response += "{\"pin\":" + String(i) +
+                ", \"description\":" + String(pins_array[i].description) +
+                ", \"start0\":" + String(pins_array[i].start0) +
+                ", \"end0\":" + String(pins_array[i].end0) +
+                ", \"status\":" + pins_array[i].status +
+                ", \"result\":" + String(pins_array[i].result) +
+                "}";
     if (i != 8)
     {
       response += ",";
@@ -302,7 +312,7 @@ void handleDigitalPinGet()
 {
   String response = "";
   int pin = server.arg(String("pin")).toInt();
-  if (pin >= 0 && pin < MAX_PIN_NUMBER)
+  if (pin >= 0 && pin < AMOUNT_OF_PINS)
   {
     response += "{\"pin\":" + String(pin) +
                 ", \"description\":" + String(pins_array[pin].description) +
@@ -323,44 +333,22 @@ void handleDigitalPinGet()
 void handleDigitalPinPost()
 {
   String response = "";
-  int pin = server.arg(String("pin")).toInt();
-  long start0 = server.arg(String("start0")).toInt();
-  long end0 = server.arg(String("end0")).toInt();
-  long start1 = server.arg(String("start1")).toInt();
-  long end1 = server.arg(String("end1")).toInt();
-  long duration0 = end0 - start0;
-  long duration1 = end1 - start1;
-  if (pin >= 0 && pin <= 8)
+
+  if (server.hasArg(String("start0")))
   {
-    if (duration0 > 0L)
+    long pin = server.arg(String("pin")).toInt();
+    long start0 = server.arg(String("start0")).toInt();
+    long end0 = server.arg(String("end0")).toInt();
+    long duration0 = end0 - start0;
+    if (pin >= 0 && pin < AMOUNT_OF_PINS)
     {
-      if (duration0 < MAX_DURATION_SECONDS)
+      if (duration0 > 0L)
       {
-        pins_array[pin].start0 = start0;
-        pins_array[pin].end0 = end0;
-        pins_array[pin].result = "\"Programado fase 1\"";
-        if (duration1 > 0L)
+        if (duration0 < MAX_DURATION_SECONDS)
         {
-          if (duration1 < MAX_DURATION_SECONDS)
-          {
-            pins_array[pin].start1 = start1;
-            pins_array[pin].end1 = end1;
-            pins_array[pin].result = "\"Programados fase 1 y 2\"";
-            response += "{\"pin\":" + String(pin) +
-                        ", \"description\":" + String(pins_array[pin].description) +
-                        ", \"start0\":" + String(pins_array[pin].start0) +
-                        ", \"end0\":" + String(pins_array[pin].end0) +
-                        ", \"status\":" + pins_array[pin].status +
-                        ", \"result\":" + String(pins_array[pin].result) +
-                        "}";
-          }
-          else
-          {
-            response = "{\"error\":\"Pin digital D" + String(pin) + " mal programado(2). Duracion maxima " + String(MAX_DURATION_SECONDS) + "\"}";
-          }
-        }
-        else
-        {
+          pins_array[pin].start0 = start0;
+          pins_array[pin].end0 = end0;
+          pins_array[pin].result = "\"Programado fase 1\"";
           response += "{\"pin\":" + String(pin) +
                       ", \"description\":" + String(pins_array[pin].description) +
                       ", \"start0\":" + String(pins_array[pin].start0) +
@@ -369,20 +357,26 @@ void handleDigitalPinPost()
                       ", \"result\":" + String(pins_array[pin].result) +
                       "}";
         }
+        else
+        {
+          response = "{\"error\":\"Pin digital D" + String(pin) +
+                     " mal programado. Duracion maxima " + String(MAX_DURATION_SECONDS) + "\"}";
+        }
       }
       else
       {
-        response = "{\"error\":\"Pin digital D" + String(pin) + " mal programado(2). Duracion maxima " + String(MAX_DURATION_SECONDS) + "\"}";
+        response = "{\"error\":\"Pin digital D" + String(pin) +
+                   " mal programado. Sin duración: " + String(start0) + "-" + String(end0) + "\"}";
       }
     }
     else
     {
-      response = "{\"error\":\"Pin digital D" + String(pin) + " mal programado(1). Sin duración.\"}";
+      response = "{\"error\":\"Pin digital debe estar entre 0 y 8\"}";
     }
   }
   else
   {
-    response = "{\"error\":\"Pin digital debe estar entre 0 y 8\"}";
+    response = "{\"error\":\"Faltan parametros\"}";
   }
   Serial.println(response);
   server.send(200, "application/json", response);
@@ -390,10 +384,10 @@ void handleDigitalPinPost()
 
 void handleDigitalPinStatus()
 {
-  String pin = server.arg(String("pin"));
-  if (pin != nullptr && pin != "")
+  int pin = server.arg(String("pin")).toInt();
+  if (pin >= 0 && pin < AMOUNT_OF_PINS)
   {
-    digitalPinStatus(pin.toInt());
+    digitalPinStatus(pin);
   }
   else
   {
@@ -403,10 +397,10 @@ void handleDigitalPinStatus()
 
 void handleDigitalPinSwitch()
 {
-  String pin = server.arg(String("pin"));
-  if (pin != nullptr && pin != "")
+  int pin = server.arg(String("pin")).toInt();
+  if (pin >= 0 && pin < AMOUNT_OF_PINS)
   {
-    digitalPinSwitch(pin.toInt());
+    digitalPinSwitch(pin);
   }
   else
   {
@@ -416,10 +410,10 @@ void handleDigitalPinSwitch()
 
 void handleDigitalPinOn()
 {
-  String pin = server.arg(String("pin"));
-  if (pin != nullptr && pin != "")
+  int pin = server.arg(String("pin")).toInt();
+  if (pin >= 0 && pin < AMOUNT_OF_PINS)
   {
-    digitalPinOn(pin.toInt());
+    digitalPinOn(pin);
   }
   else
   {
@@ -429,10 +423,10 @@ void handleDigitalPinOn()
 
 void handleDigitalPinOff()
 {
-  String pin = server.arg(String("pin"));
-  if (pin != nullptr && pin != "")
+  int pin = server.arg(String("pin")).toInt();
+  if (pin >= 0 && pin < AMOUNT_OF_PINS)
   {
-    digitalPinOff(pin.toInt());
+    digitalPinOff(pin);
   }
   else
   {
