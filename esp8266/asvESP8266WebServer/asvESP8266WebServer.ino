@@ -59,6 +59,7 @@ void loop(void)
   // Control de programación
   if (scheduledMode == 1)
   {
+    // TODO Quitamos fecha, nos quedamos con la hora sólo
     time_t ahora = time(nullptr) - 1590969600;
     for (int i = 0; i < AMOUNT_OF_PINS; i++)
     {
@@ -520,8 +521,8 @@ void digitalPinOn(int pin)
     Serial.println("Activando pin digital: D" + String(pin) + "-" + String(pins_array[pin].pin));
     digitalWrite(pins_array[pin].pin, pins_array[pin].on_value);
     pins_array[pin].status = true;
-    pins_array[pin].start0 = time(nullptr);
-    pins_array[pin].end0 = pins_array[pin].start0 + 300L;
+    pins_array[pin].start0 = pins_array[pin].start0;
+    pins_array[pin].end0 = pins_array[pin].start0 + MAX_DURATION_SECONDS;
     pins_array[pin].start1 = 0L;
     pins_array[pin].end1 = 0L;
     pins_array[pin].result = "\"Activado pin digital\"";
