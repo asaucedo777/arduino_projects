@@ -548,7 +548,7 @@ String pinToJson(record_type pin)
          ", \"start1\":" + String(pin.start1) +
          ", \"duration0\":" + String(pin.duration0) +
          ", \"duration1\":" + String(pin.duration1) +
-         ", \"status\":" + pin.status +
+         ", \"status\":" + (pin.status ? '1' : '0') +
          ", \"disabled\":" + pin.disabled +
          ", \"result\":" + String(pin.result) +
          "}";
