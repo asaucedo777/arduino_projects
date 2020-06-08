@@ -102,8 +102,8 @@ void initPins()
 {
   pins_array[0] = (record_type){0, 16, "\"Riego fase 1          \"", false, false, LOW, HIGH, 0L, 0L, MAX_DURATION_SECONDS, MAX_DURATION_SECONDS, "\"Estado inicial\""};
   pins_array[1] = (record_type){1, 5,  "\"Riego fase 2          \"", false, false, LOW, HIGH, 0L, 0L, MAX_DURATION_SECONDS, MAX_DURATION_SECONDS, "\"Estado inicial\""};
-  pins_array[2] = (record_type){2, 4,  "\"Depuradora            \"", false, true, LOW, HIGH, 0L, 0L, MAX_DURATION_SECONDS, MAX_DURATION_SECONDS, "\"Estado inicial\""};
-  pins_array[3] = (record_type){3, 0,  "\"Luz caseta            \"", false, true, LOW, HIGH, 0L, 0L, MAX_DURATION_SECONDS, MAX_DURATION_SECONDS, "\"Estado inicial\""};
+  pins_array[3] = (record_type){2, 4,  "\"Luz caseta            \"", false, true, LOW, HIGH, 0L, 0L, MAX_DURATION_SECONDS, MAX_DURATION_SECONDS, "\"Estado inicial\""};
+  pins_array[2] = (record_type){3, 0,  "\"Depuradora            \"", false, true, LOW, HIGH, 0L, 0L, MAX_DURATION_SECONDS, MAX_DURATION_SECONDS, "\"Estado inicial\""};
   pins_array[4] = (record_type){4, 2,  "\"No utilizar (LED)     \"", false, true, HIGH, LOW, 0L, 0L, MAX_DURATION_SECONDS, MAX_DURATION_SECONDS, "\"Estado inicial\""};
   pins_array[5] = (record_type){5, 14, "\"Puerta garaje interior\"", false, true, HIGH, LOW, 0L, 0L, MAX_DURATION_SECONDS, MAX_DURATION_SECONDS, "\"Estado inicial\""};
   pins_array[6] = (record_type){6, 12, "\"Puerta garaje exterior\"", false, true, HIGH, LOW, 0L, 0L, MAX_DURATION_SECONDS, MAX_DURATION_SECONDS, "\"Estado inicial\""};
@@ -524,10 +524,6 @@ void digitalPinOff(int pin)
       Serial.println("Desactivando pin digital: D" + String(pin) + "-" + String(pins_array[pin].pin));
       digitalWrite(pins_array[pin].pin, pins_array[pin].off_value);
       pins_array[pin].status = false;
-      pins_array[pin].start0 = 0L;
-      pins_array[pin].start1 = 0L;
-      pins_array[pin].duration0 = 0L;
-      pins_array[pin].duration1 = 0L;
       pins_array[pin].result = "\"Desactivado pin digital\"";
     }
     else
