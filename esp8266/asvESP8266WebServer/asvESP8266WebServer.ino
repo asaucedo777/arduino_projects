@@ -18,7 +18,7 @@ const char *SERVER_NTP_2 = "time.nist.gov";
 const int BAUD_RATE = 115200;
 const int DELAY_CONNECT = 100;
 const int ONE_SECOND = 1000;
-const int MAX_DURATION_SECONDS = 300;
+const int MAX_DURATION_SECONDS = 900;
 const int AMOUNT_OF_PINS = 9;
 const int ONE_DAY = 24 * 60 * 60;
 
@@ -150,6 +150,7 @@ void initWifi()
   Serial.println(ssid);
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
+
 }
 
 void initDns()
@@ -201,6 +202,8 @@ void initTime()
     delay(ONE_SECOND);
   }
   Serial.println("Time configured.");
+  ledBuiltinStatus = true;
+  ledBuiltinStatus ? digitalWrite(LED_BUILTIN, LOW) : digitalWrite(LED_BUILTIN, HIGH);
 }
 
 void handleTest()
