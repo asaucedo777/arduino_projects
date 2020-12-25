@@ -1,5 +1,5 @@
 {
     "board": "arduino:avr:uno",
-    "port": "/dev/tty.wchusbserial14240",
+    "port": "/dev/tty.usbmodem141201",
     "sketch": "blink-uno.ino"
 }

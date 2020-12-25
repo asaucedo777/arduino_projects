@@ -3,17 +3,19 @@
         {
             "name": "Mac",
             "includePath": [
-                "/Applications/Arduino.app/Contents/Java/hardware/tools/avr/avr/include/**",
-                "/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/**",
+                "/Applications/Arduino.app/Contents/Java/tools/**",
                 "/Applications/Arduino.app/Contents/Java/hardware/tools/**",
                 "/Applications/Arduino.app/Contents/Java/libraries/**",
+                "/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/**",
+                "/Applications/Arduino.app/Contents/Java/hardware/tools/avr/avr/include/**",
                 "/Users/asaucedovillanueva/workspaces/arduino/libraries/**",
-                "/Applications/Arduino.app/Contents/Java/tools/**"
+                "${workspaceFolder}/**"
             ],
             "forcedInclude": [
                 "/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/cores/arduino/Arduino.h"
             ],
             "macFrameworkPath": [
+                "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks",
                 "/System/Library/Frameworks",
                 "/Library/Frameworks"
             ],
