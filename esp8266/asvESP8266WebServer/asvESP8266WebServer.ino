@@ -78,7 +78,7 @@ void loop(void)
     server.handleClient();
     MDNS.update();
     delay(0);
-    // Actualizar pines
+    // Modo programación
     if (scheduledMode == 1)
     {
       // TODO Quitamos fecha, nos quedamos con la hora sólo
@@ -115,7 +115,7 @@ void loop(void)
         }
       }
     } else {
-      // Modo programación (no actualiza pines)
+      // Modo manual (no actualiza pines)
     }
   } else {
     // Pérdida de conexión WiFi
@@ -129,15 +129,15 @@ void loop(void)
 
 void initPins()
 {
-  pins_array[0] = (record_type){0, 16, (char *)"\"Riego fase 1          \"", false, false, LOW,  HIGH, 0L, 0L, MAX_DURATION_SECONDS, MAX_DURATION_SECONDS, (char *)"\"Estado inicial\""};
-  pins_array[1] = (record_type){1, 5,  (char *)"\"Riego fase 2          \"", false, false, LOW,  HIGH, 0L, 0L, MAX_DURATION_SECONDS, MAX_DURATION_SECONDS, (char *)"\"Estado inicial\""};
-  pins_array[3] = (record_type){2, 4,  (char *)"\"Luz caseta            \"", false, true,  LOW,  HIGH, 0L, 0L, MAX_DURATION_SECONDS, MAX_DURATION_SECONDS, (char *)"\"Estado inicial\""};
-  pins_array[2] = (record_type){3, 0,  (char *)"\"Depuradora            \"", false, true,  LOW,  HIGH, 0L, 0L, MAX_DURATION_SECONDS, MAX_DURATION_SECONDS, (char *)"\"Estado inicial\""};
-  pins_array[4] = (record_type){4, 2,  (char *)"\"No utilizar (LED)     \"", false, true,  HIGH, LOW,  0L, 0L, MAX_DURATION_SECONDS, MAX_DURATION_SECONDS, (char *)"\"Estado inicial\""};
-  pins_array[5] = (record_type){5, 14, (char *)"\"Puerta garaje interior\"", false, true,  HIGH, LOW,  0L, 0L, MAX_DURATION_SECONDS, MAX_DURATION_SECONDS, (char *)"\"Estado inicial\""};
-  pins_array[6] = (record_type){6, 12, (char *)"\"Puerta garaje exterior\"", false, true,  HIGH, LOW,  0L, 0L, MAX_DURATION_SECONDS, MAX_DURATION_SECONDS, (char *)"\"Estado inicial\""};
-  pins_array[7] = (record_type){7, 13, (char *)"\"Puerta casa exterior  \"", false, true,  HIGH, LOW,  0L, 0L, MAX_DURATION_SECONDS, MAX_DURATION_SECONDS, (char *)"\"Estado inicial\""};
-  pins_array[8] = (record_type){8, 15, (char *)"\"Libre                 \"", false, true,  HIGH, LOW,  0L, 0L, MAX_DURATION_SECONDS, MAX_DURATION_SECONDS, (char *)"\"Estado inicial\""};
+  pins_array[0] = (record_type){0, 16, (char *)"\"Riego fase 1          \"", true, false, LOW,  HIGH, 0L, 0L, MAX_DURATION_SECONDS, MAX_DURATION_SECONDS, (char *)"\"Estado inicial\""};
+  pins_array[1] = (record_type){1, 5,  (char *)"\"Riego fase 2          \"", true, false, LOW,  HIGH, 0L, 0L, MAX_DURATION_SECONDS, MAX_DURATION_SECONDS, (char *)"\"Estado inicial\""};
+  pins_array[3] = (record_type){2, 4,  (char *)"\"Goteo                 \"", true, false, LOW,  HIGH, 0L, 0L, MAX_DURATION_SECONDS, MAX_DURATION_SECONDS, (char *)"\"Estado inicial\""};
+  pins_array[2] = (record_type){3, 0,  (char *)"\"Depuradora            \"", false, true, LOW,  HIGH, 0L, 0L, MAX_DURATION_SECONDS, MAX_DURATION_SECONDS, (char *)"\"Estado inicial\""};
+  pins_array[4] = (record_type){4, 2,  (char *)"\"No utilizar (LED)     \"", false, true, HIGH, LOW,  0L, 0L, MAX_DURATION_SECONDS, MAX_DURATION_SECONDS, (char *)"\"Estado inicial\""};
+  pins_array[5] = (record_type){5, 14, (char *)"\"Puerta garaje interior\"", false, true, HIGH, LOW,  0L, 0L, MAX_DURATION_SECONDS, MAX_DURATION_SECONDS, (char *)"\"Estado inicial\""};
+  pins_array[6] = (record_type){6, 12, (char *)"\"Puerta garaje exterior\"", false, true, HIGH, LOW,  0L, 0L, MAX_DURATION_SECONDS, MAX_DURATION_SECONDS, (char *)"\"Estado inicial\""};
+  pins_array[7] = (record_type){7, 13, (char *)"\"Puerta casa exterior  \"", false, true, HIGH, LOW,  0L, 0L, MAX_DURATION_SECONDS, MAX_DURATION_SECONDS, (char *)"\"Estado inicial\""};
+  pins_array[8] = (record_type){8, 15, (char *)"\"Libre                 \"", false, true, HIGH, LOW,  0L, 0L, MAX_DURATION_SECONDS, MAX_DURATION_SECONDS, (char *)"\"Estado inicial\""};
 
   for (int i = 0; i < AMOUNT_OF_PINS; i++)
   {
@@ -198,24 +198,33 @@ void initDns()
   }
 }
 
+void setCrossOrigin()
+{
+  server.sendHeader("Access-Control-Allow-Origin", "*");
+  server.sendHeader("Access-Control-Max-Age", "600");
+  server.sendHeader("Access-Control-Allow-Methods", "GET,OPTIONS,PUT,POST");
+  server.sendHeader("Access-Control-Allow-Headers", "*");
+}
+
 void initServer()
 {
+
   server.on("/TEST", handleTest);
   server.on("/TIME", handleTime);
-
   server.on("/LED_BUILTIN", handleLedBuiltinGet);
-  server.on("/LED_BUILTIN/SWITCH", handleLedBuiltinSwitch);
-  server.on("/LED_BUILTIN/ON", handleLedBuiltinOn);
-  server.on("/LED_BUILTIN/OFF", handleLedBuiltinOff);
-
   server.on("/DIGITAL_PINS", handleDigitalPins);
   server.on("/DIGITAL_PIN_GET", handleDigitalPinGet);
   server.on("/DIGITAL_PIN/STATUS", handleDigitalPinStatus);
+
+  server.on("/LED_BUILTIN/SWITCH", handleLedBuiltinSwitch);
+  server.on("/LED_BUILTIN/ON", handleLedBuiltinOn);
+  server.on("/LED_BUILTIN/OFF", handleLedBuiltinOff);
   server.on("/DIGITAL_PIN/SWITCH", handleDigitalPinSwitch);
   server.on("/DIGITAL_PIN/ON", handleDigitalPinOn);
   server.on("/DIGITAL_PIN/OFF", handleDigitalPinOff);
+
   server.on("/DIGITAL_PIN_POST", HTTP_OPTIONS, []() {
-    server.sendHeader("Access-Control-Allow-Origin", "*");
+    setCrossOrigin();
     server.send(204);
   });
   server.on("/DIGITAL_PIN_POST", HTTP_POST, handleDigitalPinPost);
@@ -244,11 +253,13 @@ void initTime()
 
 void handleTest()
 {
+  setCrossOrigin();
   server.send(200, "application/json", "{\"test\":\"Welcome to esp8266!!\"}");
 }
 
 void handleTime()
 {
+  setCrossOrigin();
   time_t now = time(nullptr);
   char buff[20];
   strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
@@ -257,12 +268,14 @@ void handleTime()
 
 void handleLedBuiltinGet()
 {
+  setCrossOrigin();
   String status = ledBuiltinStatus ? "1" : "0";
   server.send(200, "application/json", "{\"ledBuiltin\":\"" + status + String("\"}"));
 }
 
 void handleLedBuiltinSwitch()
 {
+  setCrossOrigin();
   String response = "";
   if (!ledBuiltinStatus)
   {
@@ -283,6 +296,7 @@ void handleLedBuiltinSwitch()
 
 void handleLedBuiltinOn()
 {
+  setCrossOrigin();
   Serial.println("Encenciendo LED");
   String response = "";
   if (!ledBuiltinStatus)
@@ -301,6 +315,7 @@ void handleLedBuiltinOn()
 
 void handleLedBuiltinOff()
 {
+  setCrossOrigin();
   Serial.println("Apagando LED.");
   String response = "";
   if (!ledBuiltinStatus)
@@ -319,6 +334,7 @@ void handleLedBuiltinOff()
 
 void handleDigitalPins()
 {
+  setCrossOrigin();
   String response = "{\"pines\":[";
   for (int i = 0; i < AMOUNT_OF_PINS; i++)
   {
@@ -335,6 +351,7 @@ void handleDigitalPins()
 
 void handleDigitalPinGet()
 {
+  setCrossOrigin();
   String response = "";
   int pin = server.arg(String("pin")).toInt();
   if (pin >= 0 && pin < AMOUNT_OF_PINS)
@@ -351,8 +368,8 @@ void handleDigitalPinGet()
 
 void handleDigitalPinPost()
 {
+  setCrossOrigin();
   String response = "";
-
   if (server.hasArg(String("pin")) 
       && server.hasArg(String("start0")) 
       && server.hasArg(String("start1")) 
@@ -417,6 +434,7 @@ void handleDigitalPinPost()
 
 void handleDigitalPinStatus()
 {
+  setCrossOrigin();
   int pin = server.arg(String("pin")).toInt();
   if (pin >= 0 && pin < AMOUNT_OF_PINS)
   {
@@ -430,6 +448,7 @@ void handleDigitalPinStatus()
 
 void handleDigitalPinSwitch()
 {
+  setCrossOrigin();
   int pin = server.arg(String("pin")).toInt();
   if (pin >= 0 && pin < AMOUNT_OF_PINS)
   {
@@ -443,6 +462,7 @@ void handleDigitalPinSwitch()
 
 void handleDigitalPinOn()
 {
+  setCrossOrigin();
   int pin = server.arg(String("pin")).toInt();
   if (pin >= 0 && pin < AMOUNT_OF_PINS)
   {
@@ -456,6 +476,7 @@ void handleDigitalPinOn()
 
 void handleDigitalPinOff()
 {
+  setCrossOrigin();
   int pin = server.arg(String("pin")).toInt();
   if (pin >= 0 && pin < AMOUNT_OF_PINS)
   {
@@ -469,11 +490,13 @@ void handleDigitalPinOff()
 
 void handleScheduledGet()
 {
+  setCrossOrigin();
   server.send(200, "application/json", "{\"scheduledMode\":" + String(scheduledMode) + "}");
 }
 
 void handleScheduledSwitch()
 {
+  setCrossOrigin();
   String response = scheduledMode == 1 ? "{\"scheduledMode\":0}" : "{\"scheduledMode\":1}";
   scheduledMode = scheduledMode == 1 ? 0 : 1;
   server.send(200, "application/json", response);
@@ -481,6 +504,7 @@ void handleScheduledSwitch()
 
 void handleNotFound()
 {
+  setCrossOrigin();
   String message = "\"Resource Not Found\",";
   message += "\"URI\":\"";
   message += server.uri();
