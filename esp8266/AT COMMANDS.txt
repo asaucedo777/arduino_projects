@@ -1,0 +1,54 @@
+Comprobar conexión, si no va cambiar velocidad del puerto 9600 o 115200
+AT
+Comprobar versión del dispositivo
+AT+GMR
+
+Comprobar modo del dispositivo 1=punto de acceso, 2=estación, 3=ambos
+AT+CWMODE_DEF?
+Listar puntos de acceso
+AT+CWLAP
+Conectar a un AP
+AT+CWJAP_DEF="vodafoneBA2094","SKJGNQGNE5Q66LTM"
+Comprobar IP y MAC
+AT+CIFSR
+  +CIFSR:APIP,"192.168.4.1"
+  +CIFSR:APMAC,"6a:c6:3a:e9:48:20"
+  +CIFSR:STAIP,"192.168.0.21"
+  +CIFSR:STAMAC,"68:c6:3a:e9:48:20"
+
+Comprobar versión del dispositivo
+AT+GMR
+
+//**** TCP SERVER ****
+// PRIMERO ES NECESARIO Activar multiples conexiones
+AT+CIPMUX=1
+// Configura un servidor TCP en el puerto 80 (1 significa activado)
+AT+CIPSERVER=1,80
+
+//**** TCP CLIENT ****
+// Conectar con el servidor remoto 192.168.1.21 en el puerto 80
+AT+CIPSTART=4,"TCP","192.168.0.21",80
+ 
+// Configurar el modo de transmisión
+AT+CIPMODE=1
+
+// Enviar data por el canal 4 (en el ejemplo 5 bytes)
+AT+CIPSEND=4,5
+
+
+fetch("http://192.168.0.11/DIGITAL_PIN_POST", {
+  "headers": {
+    "accept": "application/json, text/plain, */*",
+    "accept-language": "es-ES,es;q=0.9,en-GB;q=0.8,en;q=0.7",
+    "cache-control": "no-cache",
+    "content-type": "application/json",
+    "pragma": "no-cache"
+  },
+  "referrer": "http://localhost:4200/",
+  "referrerPolicy": "no-referrer-when-downgrade",
+  "body": "{\"pin\":\"0\",\"start0\":\"25200\",\"end0\":\"25320\"}",
+  "method": "POST",
+  "mode": "cors",
+  "credentials": "omit"
+});
+  

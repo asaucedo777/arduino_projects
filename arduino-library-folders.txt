@@ -1,0 +1,26 @@
+# Librerías principales de arduino
+/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/cores/arduino/*
+
+# Librerías varias arduino (Keyboard, Mouse, SD, Servo, ..)
+/Applications/Arduino.app/Contents/Java/libraries/**/*
+
+# Librerías de utilidad (SoftwareSerial, EEPROM, SPI, Wire)
+/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/libraries/EEPROM/src/*
+/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/libraries/HID/src/*
+/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/libraries/SoftwareSerial/src/*
+/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/libraries/SPI/src/*
+/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/libraries/Wire/src/*
+
+# Librerías para microcontraladores AVR de Atmel
+/Applications/Arduino.app/Contents/Java/hardware/tools/avr/avr/include/**
+
+# Librerías de herramientas java
+/Applications/Arduino.app/Contents/Java/tools/**/src
+
+# Librerías del usuario
+/Users/asaucedovillanueva/Library/Arduino15
+
+
+# VSCode
+# Librerías personalizadas
+/Users/asaucedovillanueva/workspaces/arduino/libraries/**

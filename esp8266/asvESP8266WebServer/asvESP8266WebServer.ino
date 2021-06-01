@@ -3,12 +3,13 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include <time.h>
+#include <ArduinoJson.h>
+#include <uri/UriRegex.h>
 
 #ifndef STASSID
 #define STASSID "MiFibra-0D4B"
 #define STAPSK "WSWpdMi6"
-// #define STASSID "vodafoneBA2094"
-// #define STAPSK "SKJGNQGNE5Q66LTM"
+
 #endif
 
 const char *ssid = STASSID;
@@ -67,9 +68,9 @@ void loop(void)
   currentMillis = millis();
   if (currentMillis - previousMillis >= WIFI_CHECK_INTERVAL)
   {
-    Serial.print("Checking WiFi status...");
+    Serial.println("Checking WiFi status...");
     wifiStatus = WiFi.status();
-    Serial.print("WiFi status: " + wifiStatus);
+    Serial.println("WiFi status: " + wifiStatus);
     previousMillis = currentMillis;
   }
   if (wifiStatus == WL_CONNECTED)
@@ -122,7 +123,7 @@ void loop(void)
     time_t now = time(nullptr);
     char buff[20];
     strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
-    Serial.print("WiFi LOST. " + String(buff));
+    Serial.println("WiFi LOST. " + String(buff));
     delay(10000);
   }
 }
@@ -161,7 +162,7 @@ void initSerial()
   {
     ;
   }
-  Serial.print("Serial BAUD_RATE: ");
+  Serial.println("Serial BAUD_RATE: ");
   Serial.println(BAUD_RATE);
 }
 
@@ -184,7 +185,7 @@ void initWifi()
   wifiStatus = WL_CONNECTED;
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
-  Serial.print("Reconnecting if lost.");
+  Serial.println("Reconnecting if lost.");
   WiFi.setAutoReconnect(true);
   WiFi.persistent(true);
 }
@@ -222,6 +223,8 @@ void initServer()
   server.on("/DIGITAL_PIN/SWITCH", handleDigitalPinSwitch);
   server.on("/DIGITAL_PIN/ON", handleDigitalPinOn);
   server.on("/DIGITAL_PIN/OFF", handleDigitalPinOff);
+  server.on("/SCHEDULED", handleScheduledGet);
+  server.on("/SCHEDULED/SWITCH", handleScheduledSwitch);
 
   server.on("/DIGITAL_PIN_POST", HTTP_OPTIONS, []() {
     setCrossOrigin();
@@ -229,8 +232,7 @@ void initServer()
   });
   server.on("/DIGITAL_PIN_POST", HTTP_POST, handleDigitalPinPost);
 
-  server.on("/SCHEDULED", handleScheduledGet);
-  server.on("/SCHEDULED/SWITCH", handleScheduledSwitch);
+  server.on(UriRegex("/DIGITAL_PINS/([0-9]+)"), HTTP_GET, handleDigitalPinsParams);
 
   server.onNotFound(handleNotFound);
   server.begin();
@@ -349,6 +351,23 @@ void handleDigitalPins()
   server.send(200, "application/json", response);
 }
 
+void handleDigitalPinsParams()
+{
+  setCrossOrigin();
+  String response = "";
+  int pin = server.pathArg(0).toInt();
+  if (pin >= 0 && pin < AMOUNT_OF_PINS)
+  {
+    response = pinToJson(pins_array[pin]);
+  }
+  else
+  {
+    response = "{\"error\":\"Parametro pin es obligatorio. Valor entre 0 y 8\"}";
+  }
+  Serial.println(response);
+  server.send(200, "application/json", response);
+}
+
 void handleDigitalPinGet()
 {
   setCrossOrigin();
@@ -368,66 +387,78 @@ void handleDigitalPinGet()
 
 void handleDigitalPinPost()
 {
+  DynamicJsonDocument doc(512);
+
   setCrossOrigin();
   String response = "";
-  if (server.hasArg(String("pin")) 
-      && server.hasArg(String("start0")) 
-      && server.hasArg(String("start1")) 
-      && server.hasArg(String("duration0")) 
-      && server.hasArg(String("duration1")))
-  {
-    long pin = server.arg(String("pin")).toInt();
-    long start0 = server.arg(String("start0")).toInt();
-    long start1 = server.arg(String("start1")).toInt();
-    long duration0 = server.arg(String("duration0")).toInt();
-    long duration1 = server.arg(String("duration1")).toInt();
-    if (pin >= 0 && pin < AMOUNT_OF_PINS)
+  // TODO BODY
+  //Check if body received
+  if (server.hasArg("plain") == false)
+  { 
+    server.send(200, "text/plain", "Body not received");
+    return;
+  } else {
+    deserializeJson(doc, server.arg("plain"));
+    if (doc["pin"] && doc["start0"] && doc["start1"] && doc["duration0"] && doc["duration1"])
     {
-      if (duration0 > 0L)
+      auto s_pin = doc["pin"].as<const char *>();
+      auto s_start0 = doc["start0"].as<const char*>();
+      auto s_start1 = doc["start1"].as<const char*>();
+      auto s_duration0 = doc["duration0"].as<const char*>();
+      auto s_duration1 = doc["duration1"].as<const char*>();
+      long pin = atol(s_pin);
+      long start0 = atol(s_start0);
+      long start1 = atol(s_start1);
+      long duration0 = atol(s_duration0);
+      long duration1 = atol(s_duration1);
+      if (pin >= 0 && pin < AMOUNT_OF_PINS)
       {
-        if (duration0 > MAX_DURATION_SECONDS 
-            || duration1 > MAX_DURATION_SECONDS)
+        if (duration0 > 0L)
         {
-          response = "{\"error\":\"Pin digital D" + String(pin) +
-                     " mal programado. Duracion maxima " + String(MAX_DURATION_SECONDS) + "\"}";
+          if (duration0 > MAX_DURATION_SECONDS || duration1 > MAX_DURATION_SECONDS)
+          {
+            response = "{\"error\":\"Pin digital D" + String(pin) +
+                       " mal programado. Duracion maxima " + String(MAX_DURATION_SECONDS) + "\"}";
+          }
+          else
+          {
+            pins_array[pin].start0 = start0;
+            pins_array[pin].start1 = start1;
+            pins_array[pin].duration0 = duration0;
+            pins_array[pin].duration1 = duration1;
+            pins_array[pin].result = (char *)"\"Programado fase 1\"";
+            response = pinToJson(pins_array[pin]);
+          }
         }
         else
         {
-          pins_array[pin].start0 = start0;
-          pins_array[pin].start1 = start1;
-          pins_array[pin].duration0 = duration0;
-          pins_array[pin].duration1 = duration1;
-          pins_array[pin].result = (char *)"\"Programado fase 1\"";
-          response = pinToJson(pins_array[pin]);
+          if (duration0 == 0L)
+          {
+            pins_array[pin].start0 = start0;
+            pins_array[pin].start1 = start1;
+            pins_array[pin].duration0 = duration0;
+            pins_array[pin].duration1 = duration1;
+            pins_array[pin].result = (char *)"\"Desprogramado fase 1\"";
+            response = pinToJson(pins_array[pin]);
+          }
+          else
+          {
+            response = "{\"error\":\"Pin digital D" + String(pin) +
+                       " mal programado. Duracion negativa: " + String(start0) + "-" + String(start1) + "\"}";
+          }
         }
       }
       else
       {
-        if (duration0 == 0L)
-        {
-          pins_array[pin].start0 = start0;
-          pins_array[pin].start1 = start1;
-          pins_array[pin].duration0 = duration0;
-          pins_array[pin].duration1 = duration1;
-          pins_array[pin].result = (char *)"\"Desprogramado fase 1\"";
-          response = pinToJson(pins_array[pin]);
-        }
-        else
-        {
-          response = "{\"error\":\"Pin digital D" + String(pin) +
-                     " mal programado. Duracion negativa: " + String(start0) + "-" + String(start1) + "\"}";
-        }
+        response = "{\"error\":\"Pin digital debe estar entre 0 y 8\"}";
       }
     }
     else
     {
-      response = "{\"error\":\"Pin digital debe estar entre 0 y 8\"}";
+      response = "{\"error\":\"Faltan parametros\"}";
     }
   }
-  else
-  {
-    response = "{\"error\":\"Faltan parametros\"}";
-  }
+
   Serial.println(response);
   server.send(200, "application/json", response);
 }
