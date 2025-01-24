@@ -1,0 +1,6 @@
+{
+    "sketch": "SoftwareSerialExample.ino",
+    "port": "/dev/tty.usbserial-1120",
+    "board": "arduino:avr:uno",
+    "programmer": "arduinoasisp"
+}

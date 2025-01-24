@@ -1,0 +1,6 @@
+{
+    "sketch": "UART.ino",
+    "port": "/dev/tty.usbserial-1130",
+    "board": "esp32:esp32:esp32c2",
+    "configuration": "PartitionScheme=minimal,FlashMode=qio,FlashFreq=60,FlashSize=2M,UploadSpeed=921600,DebugLevel=none,EraseFlash=none"
+}

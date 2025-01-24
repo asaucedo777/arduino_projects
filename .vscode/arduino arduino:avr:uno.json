@@ -1,0 +1,7 @@
+{
+    "board": "arduino:avr:uno",
+    "output": "./output",
+    "port": "/dev/tty.usbserial-1120",
+    "programmer": "arduinoisp",
+    "sketch": "uno/outAnalogico/BlinkAnalogWrite/BlinkAnalogWrite.ino"
+}

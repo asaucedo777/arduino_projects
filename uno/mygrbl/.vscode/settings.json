@@ -1,9 +1,0 @@
-{
-    "arduino.logLevel": "info",
-    "arduino.enableUSBDetection": true,
-    "arduino.disableTestingOpen": false,
-    "arduino.skipHeaderProvider": false,
-    "arduino.additionalUrls": [
-    ],
-    "arduino.defaultBaudRate": 115200
-}
