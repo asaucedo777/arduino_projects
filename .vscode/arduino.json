@@ -1,8 +1,8 @@
 {
-    "board": "esp8266:esp8266:esp8285",
-    "configuration": "xtal=80,vt=flash,exception=disabled,stacksmash=disabled,ssl=all,mmu=3232,non32xfer=fast,ResetMethod=nodemcu,CrystalFreq=26,eesz=autoflash,led=2,sdk=nonosdk_190703,ip=lm2f,dbg=Disabled,lvl=None____,wipe=none,baud=115200",
+    "board": "arduino:avr:nano",
+    "configuration": "cpu=atmega328old",
     "output": "./output",
-    "port": "/dev/tty.usbserial-1130",
+    "port": "/dev/tty.usbserial-A5069RR4",
     "programmer": "AVR ISP",
-    "sketch": "esp8266-001/blink/blink.ino"
+    "sketch": "nano/emisorRF/emisorRF.ino"
 }

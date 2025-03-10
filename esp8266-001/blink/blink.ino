@@ -20,7 +20,21 @@ void loop()
   digitalWrite(LED_BUILTIN, LOW); // Turn the LED on (Note that LOW is the voltage level
   // but actually the LED is on; this is because
   // it is active low on the ESP-01)
-  delay(1000);                     // Wait for a second
+  delay(200);                     // Wait for a second
   digitalWrite(LED_BUILTIN, HIGH); // Turn the LED off by making the voltage HIGH
-  delay(2000);                     // Wait for two seconds (to demonstrate the active low LED)
+  delay(200);                     // Wait for two seconds (to demonstrate the active low LED)
 }
+
+
+/* 
+Experimento:
+
+* primero preparar el adaptador USB a TTL CH340G para programar el ESP8266
+  - Soldar pulsador entre los pines VCC y GP0 (PINES 5 Y 7)
+* con el pulsador presionado conectar el adaptador USB a TTL CH340G al PC
+  - Cargar el sketch blink en el ESP8266
+* conectar el ESP8266 a un adaptador de protoboard
+* alimentar con 3.3v
+* conectar LED entre el pin GP2 y GND
+
+*/

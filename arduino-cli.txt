@@ -1,0 +1,87 @@
+Interfaz de la línea de comandos de Arduino (arduino-cli)
+  Uso:
+    arduino-cli [command]
+  Ejemplos:
+    arduino-cli <comando> [banderas...]
+  Comandos disponibles:
+    board           Comandos de la placa Arduino.
+    burn-bootloader Cargar el bootloader.
+    cache           Comandos de cache de Arduino
+    compile         Compila los sketch de Arduino
+    completion      Generates completion scripts
+    config          Commandos de configuración de Arduino
+    core            Operaciones del núcleo Arduino
+    daemon          Run the Arduino CLI as a gRPC daemon.
+    debug           Depurar sketches de Arduino.
+    help            Help about any command
+    lib             Comandos sobre librerías de Arduino
+    monitor         Abre un puerto de comunicación con una placa.
+    outdated        Lists cores and libraries that can be upgraded
+    sketch          Comandos de sketch de Arduino CLI.
+    update          Updates the index of cores and libraries
+    upgrade         Upgrades installed cores and libraries.
+    upload          Upload Arduino sketches.
+    version         Shows version number of Arduino CLI.
+  Banderas:
+        --additional-urls strings   Lista separada por comas de URLs adicionales para el Gestor de Tarjetas.
+        --config-dir string         Sets the default data directory (Arduino CLI will look for configuration file in this directory).
+        --config-file string        The custom config file (if not specified the default will be used).
+    -h, --help                      help for arduino-cli
+        --json                      Print the output in JSON format.
+        --log                       Print the logs on the standard output.
+        --log-file string           Path to the file where logs will be written.
+        --log-format string         The output format for the logs, can be: text, json (default "text")
+        --log-level string          Messages with this level and above will be logged. Valid levels are: trace, debug, info, warn, error, fatal, panic (default "info")
+        --no-color                  Disable colored output.
+  Use "arduino-cli [command] --help"para más información acerca de un comando.
+Comandos de la placa Arduino.
+  Uso:
+    arduino-cli board [command]
+  Ejemplos:
+    # Enumera todas las placas conectadas.
+    arduino-cli board list
+  Comandos disponibles:
+    attach      Conecta una tabla al sketch.
+    details     Print details about a board.
+    list        Listar las placas conectadas.
+    listall     List all known boards and their corresponding FQBN.
+    search      Search for a board in the Boards Manager.
+  Banderas:
+    -h, --help   help for board
+  Banderas globales:
+        --additional-urls strings   Lista separada por comas de URLs adicionales para el Gestor de Tarjetas.
+        --config-dir string         Sets the default data directory (Arduino CLI will look for configuration file in this directory).
+        --config-file string        The custom config file (if not specified the default will be used).
+        --json                      Print the output in JSON format.
+        --log                       Print the logs on the standard output.
+        --log-file string           Path to the file where logs will be written.
+        --log-format string         The output format for the logs, can be: text, json (default "text")
+        --log-level string          Messages with this level and above will be logged. Valid levels are: trace, debug, info, warn, error, fatal, panic (default "info")
+        --no-color                  Disable colored output.
+  Use "arduino-cli board [command] --help"para más información acerca de un comando.
+Commandos de configuración de Arduino
+  Uso:
+    arduino-cli config [command]
+  Ejemplos:
+    arduino-cli config init
+  Comandos disponibles:
+    add         Agrega  uno o más valores a una configuración.
+    delete      Elimina una llave de configuraciones y sus sub-llaves.
+    dump        Prints the current configuration
+    get         Gets a settings key value.
+    init        Writes current configuration to a configuration file.
+    remove      Removes one or more values from a setting.
+    set         Sets a setting value.
+  Banderas:
+    -h, --help   help for config
+  Banderas globales:
+        --additional-urls strings   Lista separada por comas de URLs adicionales para el Gestor de Tarjetas.
+        --config-dir string         Sets the default data directory (Arduino CLI will look for configuration file in this directory).
+        --config-file string        The custom config file (if not specified the default will be used).
+        --json                      Print the output in JSON format.
+        --log                       Print the logs on the standard output.
+        --log-file string           Path to the file where logs will be written.
+        --log-format string         The output format for the logs, can be: text, json (default "text")
+        --log-level string          Messages with this level and above will be logged. Valid levels are: trace, debug, info, warn, error, fatal, panic (default "info")
+        --no-color                  Disable colored output.
+  Use "arduino-cli config [command] --help"para más información acerca de un comando.
